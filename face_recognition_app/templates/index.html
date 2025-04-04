@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Recognition</title>
+</head>
+<body>
+    <h2>Real-Time Face Recognition</h2>
+    <a href="/upload/">Upload & Train Face</a><br><br>
+    <button onclick="startRecognition()">Start Webcam</button>
+
+    <script>
+        function startRecognition() {
+            fetch("/start_recognition/")
+                .then(response => response.json())
+                .then(data => alert(data.message))
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
