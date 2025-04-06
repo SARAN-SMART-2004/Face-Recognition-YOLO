@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Face</title>
+    <title>Unknown Faces</title>
     <style>
         * {
             box-sizing: border-box;
@@ -14,8 +13,11 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f1ee;
+            background-color: #f0f2f5;
+            color: #333;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .navbar {
@@ -77,66 +79,82 @@
             font-size: 1rem;
         }
 
-        .mobile-nav.show {
-            display: flex;
-        }
-
         h2 {
-            text-align: center;
-            margin: 40px 20px 20px 20px;
             font-size: 2rem;
-            color: #333;
+            margin: 30px 0 10px;
+            text-align: center;
+            color: #2c3e50;
         }
 
-        .center {
+        .container {
             display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 30px 10px;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            width: 220px;
+            height: 280px;
+            perspective: 1000px;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        .flip-card-front {
+            background-color: #fff;
+        }
+
+        .flip-card-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .flip-card-back {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            margin-top: 30px;
+            padding: 15px;
         }
 
-        form {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 450px;
+        .flip-card-back p {
+            margin: 6px 0;
+            font-size: 0.95rem;
         }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #444;
-            font-size: 1rem;
-        }
-
-        input[type="text"],
-        input[type="file"] {
-            width: 100%;
-            padding: 10px 12px;
-            margin-bottom: 20px;
-            border: 1px solid #999;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        button {
-            background-color: #2a7a78;
-            color: white;
-            border: none;
-            padding: 12px 0;
-            font-size: 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #195e5c;
+        .no-data {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 1.2rem;
+            color: #777;
         }
 
         @media (max-width: 768px) {
@@ -148,28 +166,19 @@
                 display: flex;
             }
 
-            .mobile-nav {
-                display: none;
+            .mobile-nav.show {
+                display: flex;
             }
 
             h2 {
                 font-size: 1.6rem;
-            }
-
-            input, button {
-                font-size: 1rem;
-            }
-
-            form {
-                padding: 20px;
-                width: 95%;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Navigation Bar -->
+    <!-- NAVIGATION -->
     <div class="navbar">
         <div class="logo">Maegham FaceGuard</div>
         <div class="hamburger" onclick="toggleMenu()">
@@ -193,20 +202,30 @@
         <a href="/start_recognition/">Start</a>
     </div>
 
-    <!-- Page Content -->
-    <h2>Upload & Train a New Face</h2>
+    <!-- MAIN CONTENT -->
+    <h2>Unknown Faces</h2>
 
-    <div class="center">
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-
-            <label for="image">Image:</label>
-            <input type="file" id="image" name="image" accept="image/*" required>
-
-            <button type="submit">Upload & Train</button>
-        </form>
+    <div class="container">
+        {% for face in unknown_faces %}
+        <div class="flip-card">
+            <div class="flip-card-inner">
+                <div class="flip-card-front">
+                    {% if face.image %}
+                        <img src="{{ face.image.url }}" alt="Unknown Face">
+                    {% else %}
+                        <p>No Image</p>
+                    {% endif %}
+                </div>
+                <div class="flip-card-back">
+                    <p><strong>Label:</strong> {{ face.label }}</p>
+                    <p><strong>Date:</strong> {{ face.uploaded_at|date:"Y-m-d" }}</p>
+                    <p><strong>Time:</strong> {{ face.uploaded_at|time:"H:i:s" }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="no-data">No unknown faces found.</p>
+        {% endfor %}
     </div>
 
     <script>
@@ -215,6 +234,5 @@
             mobileNav.classList.toggle("show");
         }
     </script>
-
 </body>
 </html>

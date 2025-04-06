@@ -1,14 +1,261 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Face Recognition</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Attendance Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .navbar .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ecf0f1;
+        }
+
+        .navbar nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar nav a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .navbar nav a:hover {
+            color: #1abc9c;
+        }
+
+        /* Hamburger */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            height: 3px;
+            width: 25px;
+            background: #fff;
+            margin: 4px 0;
+            transition: 0.3s;
+        }
+
+        .mobile-nav {
+            display: none;
+            flex-direction: column;
+            background-color: #34495e;
+            padding: 10px 30px;
+        }
+
+        .mobile-nav a {
+            color: #ecf0f1;
+            text-decoration: none;
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        /* Main content */
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        a.btn, button {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        a.btn {
+            background-color: #34495e;
+            color: #fff;
+        }
+
+        a.btn:hover {
+            background-color: #2c3e50;
+        }
+
+        button {
+            background-color: #1abc9c;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #16a085;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .card p {
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 768px) {
+            .navbar nav {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .mobile-nav.show {
+                display: flex;
+            }
+
+            h2 {
+                font-size: 1.6rem;
+            }
+
+            .button-group {
+                width: 90%;
+            }
+
+            .dashboard-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .card {
+                margin: 10px 0;
+                width: 90%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Real-Time Face Recognition</h2>
-    <a href="/upload/">Upload & Train Face</a><br><br>
-    <button onclick="startRecognition()">Start Webcam</button>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="logo">Maegham FaceGuard</div>
+        <div class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/upload/">Upload</a>
+            <a href="{% url 'attendance' %}">Attendance</a>
+            <a href="/start_recognition/">Start</a>
+        </nav>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-nav" id="mobileNav">
+        <a href="/">Home</a>
+        <a href="/upload/">Upload</a>
+        <a href="{% url 'attendance' %}">Attendance</a>
+        <a href="/start_recognition/">Start</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h2>Real-Time Face Recognition Dashboard</h2>
+        
+        <div class="dashboard-cards">
+            <div class="card">
+                <h3>Total Remaining Attendance</h3>
+                <p>150</p>
+            </div>
+            <div class="card">
+                <h3>Attendance Today</h3>
+                <p>45</p>
+            </div>
+            <div class="card">
+                <h3>Unknown Faces Detected</h3>
+                <p>5</p>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <a href="/upload/" class="btn">Upload & Train Face</a>
+            <a href="{% url 'attendance' %}" class="btn">View Attendance</a>
+            <a href="{% url 'unknown_faces' %}" class="btn">View Unknown Faces</a>
+            <button onclick="startRecognition()">Start Webcam</button>
+        </div>
+    </div>
 
     <script>
+        function toggleMenu() {
+            const mobileNav = document.getElementById("mobileNav");
+            mobileNav.classList.toggle("show");
+        }
+
         function startRecognition() {
             fetch("/start_recognition/")
                 .then(response => response.json())
