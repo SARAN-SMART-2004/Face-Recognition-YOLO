@@ -1,15 +1,192 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Upload Face</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Model | Maegham FaceGuard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-    <h2>Upload & Train a New Face</h2>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        Name: <input type="text" name="name" required><br><br>
-        Image: <input type="file" name="image" accept="image/*" required><br><br>
-        <button type="submit">Upload & Train</button>
-    </form>
+<body class="min-h-screen bg-gradient-to-br from-primary-900 to-primary-800 flex flex-col">
+    <!-- Navigation Bar -->
+    <nav class="bg-white/5 backdrop-blur-md border-b border-white/10 fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                        <span class="text-white font-bold text-xl">Maegham FaceGuard</span>
+                    </div>
+                </div>
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-4">
+                        <a href="/" class="text-white/80 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-home mr-1"></i> Home
+                        </a>
+                        <a href="/train/" class="text-white/80 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-robot mr-1"></i> Train Model
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
+        <div class="w-full max-w-4xl">
+            <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
+                <!-- Card Header -->
+                <div class="bg-primary-700 py-6 px-8 text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="bg-white/20 p-3 rounded-full">
+                            <i class="fas fa-robot text-white text-3xl"></i>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Train Face Recognition Model</h2>
+                    <p class="mt-1 text-white/80 text-sm">Improve accuracy by training with new face data</p>
+                </div>
+
+                <!-- Card Body -->
+                <div class="px-8 py-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Training Steps -->
+                        <div class="space-y-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Training Steps</h3>
+                            
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 bg-primary-100 rounded-full p-2">
+                                    <i class="fas fa-camera text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-gray-800">1. Capture Images</h4>
+                                    <p class="mt-1 text-sm text-gray-600">Ensure you have multiple images per person from different angles</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 bg-primary-100 rounded-full p-2">
+                                    <i class="fas fa-upload text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-gray-800">2. Upload Dataset</h4>
+                                    <p class="mt-1 text-sm text-gray-600">Organize images in labeled folders and upload</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 bg-primary-100 rounded-full p-2">
+                                    <i class="fas fa-cogs text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-gray-800">3. Start Training</h4>
+                                    <p class="mt-1 text-sm text-gray-600">The system will extract facial features and train the model</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Training Form -->
+                        <div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Dataset Directory</label>
+                                    <div class="mt-1 flex rounded-md shadow-sm">
+                                        <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                                            /datasets/
+                                        </span>
+                                        <input type="text" class="focus:ring-primary-500 focus:border-primary-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300" placeholder="dataset-name">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Training Parameters</label>
+                                    <select class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
+                                        <option>Default Parameters</option>
+                                        <option>High Accuracy</option>
+                                        <option>Fast Training</option>
+                                        <option>Custom...</option>
+                                    </select>
+                                </div>
+
+                                <div class="flex items-center">
+                                    <input id="augmentation" name="augmentation" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                                    <label for="augmentation" class="ml-2 block text-sm text-gray-700">
+                                        Use Data Augmentation
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                        <i class="fas fa-play mr-2"></i> Start Training
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Training Progress -->
+                    <div class="mt-8">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Training Progress</h3>
+                        <div class="bg-gray-100 rounded-lg p-4">
+                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                <span>Model Accuracy: 0%</span>
+                                <span>Epoch 0/50</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-primary-600 h-2.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500 italic">Training not started</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/5 backdrop-blur-md border-t border-white/10 text-center text-white/80 text-sm py-4 mt-auto">
+        <p>© 2023 Maegham FaceGuard. All rights reserved.</p>
+        <p class="mt-1">
+            <a href="#" class="hover:text-white transition-colors">Privacy Policy</a> • 
+            <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+        </p>
+    </footer>
+
+    <script>
+        // Training simulation would go here
+        function startTraining() {
+            console.log("Training started...");
+            // Simulate training progress
+        }
+    </script>
 </body>
 </html>

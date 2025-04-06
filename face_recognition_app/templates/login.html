@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Maegham FaceGuard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .animate-float {
+                animation: float 6s ease-in-out infinite;
+            }
+            @keyframes float {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-20px); }
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-primary-900 to-primary-800 flex flex-col">
+    <!-- Navigation Bar -->
+    <nav class="bg-white/5 backdrop-blur-md border-b border-white/10 fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                        <span class="text-white font-bold text-xl">Maegham FaceGuard</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-4">
+                        <a href="/" class="text-white/80 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-home mr-1"></i> Home
+                        </a>
+                        <a href="/upload/" class="text-white/80 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-upload mr-1"></i> Upload
+                        </a>
+                        <a href="{% url 'attendance' %}" class="text-white/80 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-clipboard-list mr-1"></i> Attendance
+                        </a>
+                        <a href="/start_recognition/" class="text-white/80 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-play mr-1"></i> Start
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button type="button" class="text-white hover:text-white focus:outline-none" id="mobile-menu-button">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="md:hidden hidden bg-white/5 backdrop-blur-md" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="/" class="text-white/80 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-home mr-2"></i> Home
+                </a>
+                <a href="/upload/" class="text-white/80 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-upload mr-2"></i> Upload
+                </a>
+                <a href="{% url 'attendance' %}" class="text-white/80 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-clipboard-list mr-2"></i> Attendance
+                </a>
+                <a href="/start_recognition/" class="text-white/80 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-play mr-2"></i> Start
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
+        <div class="w-full max-w-md space-y-8">
+            <!-- Login Card -->
+            <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
+                <!-- Card Header -->
+                <div class="bg-primary-700 py-6 px-8 text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="bg-white/20 p-3 rounded-full">
+                            <i class="fas fa-user-shield text-white text-3xl"></i>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Admin Login</h2>
+                    <p class="mt-1 text-white/80 text-sm">Secure access to the admin dashboard</p>
+                </div>
+
+                <!-- Card Body -->
+                <div class="px-8 py-6">
+                    <form method="POST" class="mt-4 space-y-6">
+                        {% csrf_token %}
+                        
+                        <!-- Username Field -->
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                <input id="username" name="username" type="text" required 
+                                    class="py-3 pl-10 block w-full border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                    placeholder="Enter your username">
+                            </div>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input id="password" name="password" type="password" required 
+                                    class="py-3 pl-10 block w-full border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                    placeholder="Enter your password">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <button type="button" class="text-gray-400 hover:text-gray-500 focus:outline-none" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="remember-me" name="remember-me" type="checkbox" 
+                                    class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-700">
+                                    Remember me
+                                </label>
+                            </div>
+                            <div class="text-sm">
+                                <a href="#" class="font-medium text-primary-600 hover:text-primary-500">
+                                    Forgot password?
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div>
+                            <button type="submit" 
+                                class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+                                <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </span>
+                                Sign in
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Footer Links -->
+            <div class="text-center text-white/80 text-sm">
+                <p>© 2023 Maegham FaceGuard. All rights reserved.</p>
+                <p class="mt-1">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a> • 
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript for interactive elements -->
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Password visibility toggle
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Form submission loading state
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = `
+                <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+                Signing in...
+            `;
+        });
+    </script>
+</body>
+</html>
