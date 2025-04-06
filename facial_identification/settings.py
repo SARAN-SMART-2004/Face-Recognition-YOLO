@@ -134,7 +134,7 @@ EMAIL_HOST = 'smtp.gmail.com'  # or your mail server
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'travelcrewservice@gmail.com'       # Replace with your email
-EMAIL_HOST_PASSWORD = 'kozbetcjgcairlyl'     # Use App Password if Gmail
+EMAIL_HOST_PASSWORD = ''     # Use App Password if Gmail
 
 # Admin Email
 ADMIN_EMAIL = 'saran152004s@gmail.com'  # Replace with your admin email
