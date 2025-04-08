@@ -1,10 +1,8 @@
 <!DOCTYPE html>
-{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Face</title>
+    <title>Attendance Records - {{ selected_date }}</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,16 +30,6 @@
             }
         }
     </script>
-    
-    <style>
-        /* Custom styles for hero section */
-        .hero-bg {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.pexels.com/photos/3761509/pexels-photo-3761509.jpeg');
-            background-size: cover;
-            height: 40vh;
-            background-position: center;
-        }
-    </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200">
     <!-- Navigation Bar -->
@@ -100,67 +88,87 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-bg">
-        <div class="container mx-auto text-center py-12">
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
-                <i class="fas fa-user-plus mr-2"></i> Train New Face
-            </h1>
-            <p class="text-lg text-white opacity-80 max-w-2xl mx-auto mb-8">
-                Upload a clear photo to train the facial recognition system
-            </p>
+    <!-- Main Content -->
+    <main class="pt-20 pb-16 min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
+                    <i class="fas fa-calendar-check mr-2 text-blue-500"></i> Attendance for {{ selected_date }}
+                </h2>
+                
+                <!-- Date Selection Form -->
+                <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div>
+                        <label for="day" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                            <i class="fas fa-calendar-day mr-1"></i> Day
+                        </label>
+                        <input type="number" class="w-full px-4 py-2 border-gray-300 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                               id="day" name="day" value="{{ day }}" min="1" max="31">
+                    </div>
+                    <div>
+                        <label for="month" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                            <i class="fas fa-calendar-alt mr-1"></i> Month
+                        </label>
+                        <input type="number" class="w-full px-4 py-2 border-gray-300 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                               id="month" name="month" value="{{ month }}" min="1" max="12">
+                    </div>
+                    <div>
+                        <label for="year" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                            <i class="fas fa-calendar mr-1"></i> Year
+                        </label>
+                        <input type="number" class="w-full px-4 py-2 border-gray-300 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                               id="year" name="year" value="{{ year }}">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition duration-200">
+                            <i class="fas fa-eye mr-2"></i> View Attendance
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Attendance Table -->
+                {% if data %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    {% for key in data.0.keys %}
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                            <i class="fas fa-columns mr-1"></i> {{ key|capfirst }}
+                                        </th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                {% for row in data %}
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                        {% for value in row.values %}
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
+                                                {{ value }}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-400 dark:text-yellow-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700 dark:text-yellow-300">
+                                    <i class="fas fa-info-circle mr-1"></i> No attendance data found for {{ selected_date }}.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
-    </section>
-
-    <!-- Form Section -->
-    <div class="container mx-auto px-4 pt-20">
-        <div class="max-w-md mx-auto mt-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-                <i class="fas fa-user-edit mr-2"></i> Upload Details
-            </h2>
-            
-            <form method="POST" enctype="multipart/form-data" class="space-y-6">
-                {% csrf_token %}
-                
-                <!-- Name Field -->
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                        <i class="fas fa-user mr-1"></i> Name
-                    </label>
-                    <input type="text" id="name" name="name" required
-                        class="w-full px-4 py-2 mt-1 border-gray-300 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                
-                <!-- Email Field -->
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                        <i class="fas fa-envelope mr-1"></i> Email
-                    </label>
-                    <input type="email" id="email" name="email" required
-                        class="w-full px-4 py-2 mt-1 border-gray-300 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                
-                <!-- Image Upload -->
-                <div>
-                    <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                        <i class="fas fa-image mr-1"></i> Profile Image
-                    </label>
-                    <input type="file" id="image" name="image" accept="image/*" required
-                        class="w-full px-4 py-2 mt-1 border-gray-300 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                
-                <!-- Submit Button -->
-                <button type="submit" class="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition duration-200">
-                    <i class="fas fa-upload mr-2"></i> Upload & Train
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Floating Action Button -->
-    <button onclick="showToast('Upload successful!')" class="fixed bottom-8 right-8 p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition duration-200">
-        <i class="fas fa-upload fa-2x"></i>
-    </button>
+    </main>
 
     <script>
         function toggleMenu() {
@@ -185,21 +193,6 @@
         // Check for saved theme preference
         if (localStorage.getItem('darkMode') === 'true') {
             document.documentElement.classList.add('dark');
-        }
-
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center';
-            toast.innerHTML = `
-                <i class="fas fa-check-circle mr-2"></i>
-                ${message}
-            `;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = 0;
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
         }
     </script>
 </body>

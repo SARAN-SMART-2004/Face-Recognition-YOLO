@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Analytics</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3B82F6',
+                        success: '#10B981',
+                        error: '#EF4444',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200">
+    <!-- Navigation Bar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                <i class="fas fa-user-shield text-blue-500 mr-2"></i>
+                <span>Maegham FaceGuard</span>
+            </a>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex space-x-1">
+                    <a href="/" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-home mr-2"></i> Home
+                    </a>
+                    <a href="/upload/" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-upload mr-2"></i> Upload
+                    </a>
+                    <a href="{% url 'attendance' %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-clipboard-list mr-2"></i> Attendance
+                    </a>
+                    <a href="/analytics/" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-chart-line mr-2"></i> Analytics
+                    </a>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                    <i class="fas fa-moon theme-icon"></i>
+                </button>
+                
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMenu()" class="md:hidden p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu md:hidden bg-blue-500 dark:bg-blue-600">
+            <div class="container mx-auto px-4 py-2 flex flex-col">
+                <a href="/" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-home mr-3"></i> Home
+                </a>
+                <a href="/upload/" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-upload mr-3"></i> Upload
+                </a>
+                <a href="{% url 'attendance' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-clipboard-list mr-3"></i> Attendance
+                </a>
+                <a href="/analytics/" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-chart-line mr-3"></i> Analytics
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-16 min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-white mb-8">
+                <i class="fas fa-chart-line text-blue-500 mr-2"></i> Attendance Analytics Dashboard
+            </h1>
+            
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center">
+                    <div class="text-blue-500 text-4xl mb-3">
+                        <i class="fas fa-list-ol"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Total Entries</h3>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ total_entries }}</p>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center">
+                    <div class="text-green-500 text-4xl mb-3">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Unique Persons</h3>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ unique_persons }}</p>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center">
+                    <div class="text-purple-500 text-4xl mb-3">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Days Recorded</h3>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ total_days }}</p>
+                </div>
+            </div>
+            
+            <!-- Attendance Chart -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+                    <i class="fas fa-chart-bar text-blue-500 mr-2"></i> Date-wise Attendance Summary
+                </h2>
+                <canvas id="attendanceChart" class="w-full h-96"></canvas>
+            </div>
+            
+            <!-- Individual Attendance List -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+                    <i class="fas fa-user-clock text-blue-500 mr-2"></i> View Individual Attendance
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for person in persons %}
+                        <a href="{% url 'person_attendance' person.name %}" 
+                           class="block p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 dark:bg-blue-900 text-blue-500 dark:text-blue-300 p-3 rounded-full mr-3">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="text-gray-800 dark:text-gray-200">{{ person.name }}</span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Toggle mobile menu
+        function toggleMenu() {
+            const mobileNav = document.getElementById("mobileNav");
+            mobileNav.classList.toggle("show");
+        }
+
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+            
+            // Update theme icon
+            const moonIcon = document.querySelector('.theme-icon');
+            moonIcon.classList.toggle('fa-sun');
+            moonIcon.classList.toggle('fa-moon');
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Initialize Chart
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        const attendanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ date_labels|safe }},
+                datasets: [{
+                    label: 'Total Attendance per Day',
+                    data: {{ attendance_counts|safe }},
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { 
+                        display: true,
+                        labels: {
+                            color: '#6B7280',
+                            font: {
+                                family: "'Poppins', sans-serif"
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date-wise Attendance Summary',
+                        font: { 
+                            size: 18,
+                            family: "'Poppins', sans-serif"
+                        },
+                        color: '#6B7280'
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#6B7280'
+                        },
+                        grid: {
+                            color: 'rgba(209, 213, 219, 0.3)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#6B7280'
+                        },
+                        grid: {
+                            color: 'rgba(209, 213, 219, 0.3)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
