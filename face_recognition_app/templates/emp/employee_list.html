@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management | FaceAuth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .mobile-menu { transition: all 0.3s ease; max-height: 0; overflow: hidden; }
+        .mobile-menu.active { max-height: 500px; }
+        .theme-icon { transition: transform 0.3s ease; }
+        .dark .theme-icon { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                <i class="fas fa-user-shield text-blue-500 mr-2"></i>
+                <span>FaceAuth</span>
+            </a>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="/dashboard/" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition">
+                        <i class="fas fa-home mr-2"></i> Dashboard
+                    </a>
+                    <a href="{% url 'employee_list' %}" class="px-4 py-2 text-blue-500 dark:text-blue-400 font-medium">
+                        <i class="fas fa-users mr-2"></i> Employees
+                    </a>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                    <i class="fas fa-moon theme-icon"></i>
+                </button>
+                
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMenu()" class="md:hidden p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu md:hidden bg-blue-500 dark:bg-blue-600">
+            <div class="container mx-auto px-4 py-2 flex flex-col">
+                <a href="/dashboard/" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-home mr-3"></i> Dashboard
+                </a>
+                <a href="{% url 'employee_list' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-users mr-3"></i> Employees
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-16 min-h-screen">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header Section -->
+            <div class="text-center mb-12">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-users text-blue-500 mr-2"></i> Employee Management
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    Manage your organization's employee records and access credentials
+                </p>
+            </div>
+
+            <!-- Employee Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for emp in employees %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-transform hover:scale-[1.02]">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-4">
+                                {% if emp.known_person.image %}
+                                <img src="{{ emp.known_person.image.url }}" alt="{{ emp.known_person.name }}" class="w-full h-full object-cover rounded-full">
+                                {% else %}
+                                <i class="fas fa-user text-blue-500 dark:text-blue-300 text-2xl"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ emp.user.username }}</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ emp.known_person.name }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <span class="text-gray-600 dark:text-gray-400 mr-2">Status:</span>
+                                <span class="flex items-center">
+                                    <i class="fas fa-circle text-{{ emp.known_person.image|yesno:'green,red' }}-500 mr-1 text-xs"></i>
+                                    {{ emp.known_person.image|yesno:'Active,Inactive' }}
+                                </span>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <span class="text-gray-600 dark:text-gray-400 mr-2">Password:</span>
+                                <div class="relative flex-1">
+                                    <input type="password" value="{{ emp.raw_password }}" 
+                                           class="password-input bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 text-sm w-full" 
+                                           id="pw-{{ forloop.counter }}" readonly>
+                                    <button onclick="togglePassword({{ forloop.counter }})" 
+                                            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-500">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 flex space-x-2">
+                            {% if emp.known_person.image %}
+                            <button onclick="viewImage('{{ emp.known_person.image.url }}')" 
+                                    class="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm transition">
+                                <i class="fas fa-search mr-1"></i> View
+                            </button>
+                            {% endif %}
+                            <a href="{% url 'person_attendance' emp.known_person.name %}" 
+                               class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition">
+                                <i class="fas fa-chart-bar mr-1"></i> Stats
+                            </a>
+                            <a href="{% url 'edit_employee' emp.id %}" 
+                               class="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm transition">
+                                <i class="fas fa-edit mr-1"></i> Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Add Employee Button -->
+            <div class="mt-8 text-center">
+                <a href="{% url 'add_employee' %}" 
+                   class="inline-flex items-center px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition-transform hover:scale-105">
+                    <i class="fas fa-plus mr-2"></i> Add New Employee
+                </a>
+            </div>
+
+            <!-- Unlinked Persons Section -->
+            <div class="mt-12 bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-user-clock text-blue-500 mr-2"></i> Unlinked Persons
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for person in known_persons %}
+                        {% if not person.employee %}
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <h3 class="font-medium text-gray-800 dark:text-white">{{ person.name }}</h3>
+                            <div class="flex items-center mt-2 space-x-3">
+                                <span class="text-sm flex items-center">
+                                    <i class="fas fa-image mr-1 text-{{ person.image|yesno:'green,red' }}-500"></i>
+                                    {{ person.image|yesno:'Has photo,No photo' }}
+                                </span>
+                                <span class="text-sm flex items-center">
+                                    <i class="fas fa-envelope mr-1 text-{{ person.email|yesno:'green,red' }}-500"></i>
+                                    {{ person.email|yesno:'Has email,No email' }}
+                                </span>
+                            </div>
+                            <div class="mt-3">
+                                <span class="inline-block px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs">
+                                    No account
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <a href="{% url 'add_employee' %}" 
+       class="fixed bottom-8 right-8 w-16 h-16 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-110 z-40">
+        <i class="fas fa-plus text-2xl"></i>
+    </a>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow-inner border-t border-gray-200 dark:border-gray-700 py-6">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+            &copy; 2023 FaceAuth. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-800 dark:text-white">Person Image</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="flex justify-center">
+                <img id="modalImage" src="" alt="Person Image" class="max-h-96 rounded">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle mobile menu
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            mobileMenu.classList.toggle('active');
+        }
+
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+        }
+
+        // Initialize theme from storage
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Toggle password visibility
+        function togglePassword(index) {
+            const input = document.getElementById('pw-' + index);
+            if (input) {
+                input.type = input.type === 'password' ? 'text' : 'password';
+            }
+        }
+
+        // View image in modal
+        function viewImage(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            if (modal && modalImg) {
+                modalImg.src = imageUrl;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Signup | Maegham FaceGuard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        const csrftoken = '{{ csrf_token }}';
+    </script>
+</head>
+<body class="bg-gradient-to-r from-blue-900 to-blue-700 min-h-screen flex justify-center items-center">
+
+    <!-- ✅ Notification Box -->
+    <div id="notificationBox" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded shadow-lg hidden z-50">
+        <span id="notificationText">Success!</span>
+    </div>
+
+    <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-blue-800 mb-4">Create an Account</h2>
+        <form id="signupForm" class="space-y-4">
+            <div>
+                <label class="block text-gray-700">Full Name</label>
+                <input type="text" name="fullname" required
+                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-gray-700">Email</label>
+                <input type="email" name="email" required
+                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-gray-700">Password</label>
+                <input type="password" name="password" required
+                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" name="terms" id="terms" class="mr-2">
+                <label for="terms" class="text-gray-700 text-sm">I accept the <a href="#" class="text-blue-600 hover:underline">Terms and Conditions</a></label>
+            </div>
+            <div>
+                <button type="submit"
+                    class="w-full py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700">Sign Up</button>
+            </div>
+        </form>
+
+        <div id="errorBox" class="hidden text-red-600 text-sm mt-3 text-center"></div>
+
+        <p class="text-sm text-gray-600 text-center mt-4">
+            Already have an account?
+            <a href="/login/" class="text-blue-600 hover:underline">Log in</a>
+        </p>
+    </div>
+
+    <script>
+        const showNotification = (message, color = 'green') => {
+            const box = document.getElementById('notificationBox');
+            const text = document.getElementById('notificationText');
+            box.classList.remove('hidden');
+            box.classList.remove('bg-green-600', 'bg-red-600');
+            box.classList.add(`bg-${color}-600`);
+            text.innerText = message;
+
+            setTimeout(() => {
+                box.classList.add('hidden');
+            }, 3000);
+        };
+
+        document.getElementById('signupForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = {
+                fullname: form.fullname.value,
+                email: form.email.value,
+                password: form.password.value,
+                terms: form.terms.checked
+            };
+
+            fetch('/signup/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify(data),
+            })
+            .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err)))
+            .then(data => {
+                showNotification("Signup successful! Redirecting...", 'green');
+                setTimeout(() => {
+                    window.location.href = data.redirect || '/login/';
+                }, 1500);
+            })
+            .catch(err => {
+                const errorBox = document.getElementById('errorBox');
+                errorBox.classList.remove('hidden');
+                errorBox.innerText = err.message || 'Signup failed.';
+                showNotification(err.message || "Signup failed", 'red');
+            });
+        });
+    </script>
+</body>
+</html>

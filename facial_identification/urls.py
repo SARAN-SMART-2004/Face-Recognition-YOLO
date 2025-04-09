@@ -6,6 +6,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),                      # Django Admin Panel
     path('', include('face_recognition_app.urls')),  # Routes to the face recognition app
+    
+
 ]
 
 # Serve media files during development

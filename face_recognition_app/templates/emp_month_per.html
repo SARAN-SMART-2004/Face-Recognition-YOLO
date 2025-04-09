@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Analytics | Maegham FaceGuard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .progress-bar { transition: width 0.5s ease-in-out; }
+        .mobile-menu { transition: all 0.3s ease; max-height: 0; overflow: hidden; }
+        .mobile-menu.active { max-height: 500px; }
+        .theme-icon { transition: transform 0.3s ease; }
+        .dark .theme-icon { transform: rotate(180deg); }
+        .chart-container { min-height: 20rem; }
+    </style>
+    <script>
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/dashboard/" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                <i class="fas fa-user-shield text-blue-500 mr-2"></i>
+                <span>Maegham FaceGuard</span>
+            </a>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="/dashboard/" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-home mr-2"></i> Dashboard
+                    </a>
+                    
+                    <!-- Attendance Dropdown -->
+                    <div class="relative group">
+                        <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                            <i class="fas fa-clipboard-list mr-2"></i> Attendance
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                            <a href="{% url 'attendance' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">View Attendance</a>
+                            <a href="{% url 'attendance_summary' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Summary</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Analytics Dropdown -->
+                    <div class="relative group">
+                        <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                            <i class="fas fa-chart-line mr-2"></i> Analytics
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                            <a href="{% url 'analytics' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Overview</a>
+                            <a href="{% url 'employees_month_performance' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Monthly Performance</a>
+                            <a href="{% url 'kevin' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Advanced Analytics</a>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'upload_face' %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-upload mr-2"></i> Upload
+                    </a>
+                    <a href="{% url 'unknown_faces' %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-user-secret mr-2"></i> Unknown Faces
+                    </a>
+                    
+                    <!-- Auth Dropdown -->
+                    <div class="relative group">
+                        <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                            <i class="fas fa-user-circle mr-2"></i> Account
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                                        
+                            <a href="{% url 'logout' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Logout</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                    <i class="fas fa-moon theme-icon"></i>
+                </button>
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMenu()" class="md:hidden p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu md:hidden bg-blue-500 dark:bg-blue-600">
+            <div class="container mx-auto px-4 py-2 flex flex-col">
+                <a href="/dashboard/" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-home mr-3"></i> Dashboard
+                </a>
+                <a href="{% url 'attendance' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-clipboard-list mr-3"></i> Attendance
+                </a>
+                <a href="{% url 'analytics' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-chart-line mr-3"></i> Analytics
+                </a>
+                <a href="{% url 'upload_face' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-upload mr-3"></i> Upload
+                </a>
+                <a href="{% url 'unknown_faces' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-user-secret mr-3"></i> Unknown Faces
+                </a>
+                    
+                    
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-16 min-h-screen">
+        <!-- Header Section -->
+        <section class="py-8 px-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+            <div class="container mx-auto">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">
+                            <i class="fas fa-chart-line text-blue-500 mr-2"></i> Attendance Analytics
+                        </h1>
+                        <p class="text-gray-600 dark:text-gray-300 mt-2">Track and analyze employee attendance patterns</p>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <i class="fas fa-calendar-alt text-blue-500 dark:text-blue-400 mr-2"></i>
+                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ selected_month }} {{ selected_year }}</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filter Form -->
+        <section class="py-8 px-4">
+            <div class="container mx-auto">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-filter text-blue-500 mr-2"></i> Filter Options
+                    </h2>
+                    <form method="get" class="flex flex-wrap items-center gap-4">
+                        <div class="flex-1 min-w-[200px]">
+                            <label for="month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month</label>
+                            <select name="month" id="month" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                {% for m in months %}
+                                    <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="flex-1 min-w-[200px]">
+                            <label for="year" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year</label>
+                            <select name="year" id="year" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                {% for y in year_range %}
+                                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition flex items-center">
+                            <i class="fas fa-filter mr-2"></i>Apply Filter
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section class="py-8 px-4">
+            <div class="container mx-auto">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-chart-bar text-blue-500 mr-2"></i> Attendance Overview
+                    </h2>
+                    <div class="chart-container relative h-80">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button onclick="window.location.href='{% url 'upload_face' %}'" class="fixed bottom-8 right-8 w-16 h-16 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-110 z-40">
+        <i class="fas fa-upload text-2xl"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow-inner border-t border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 py-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
+                
+                <!-- Logo & Description -->
+                <div>
+                    <a href="#" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center mb-2">
+                        <i class="fas fa-user-shield text-blue-500 mr-2"></i> Maegham FaceGuard
+                    </a>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 max-w-sm">
+                        Real-time face recognition and attendance system built for accuracy and security.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div>
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-2">Quick Links</h4>
+                        <ul class="text-gray-600 dark:text-gray-400 space-y-1 text-sm">
+                            <li><a href="/dashboard/" class="hover:text-blue-500">Dashboard</a></li>
+                            <li><a href="{% url 'upload_face' %}" class="hover:text-blue-500">Upload & Train</a></li>
+                            <li><a href="{% url 'attendance' %}" class="hover:text-blue-500">Attendance</a></li>
+                            <li><a href="{% url 'analytics' %}" class="hover:text-blue-500">Analytics</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-2">Support</h4>
+                        <ul class="text-gray-600 dark:text-gray-400 space-y-1 text-sm">
+                            <li><a href="/settings/" class="hover:text-blue-500">Settings</a></li>
+                            <li><a href="/contact/" class="hover:text-blue-500">Contact Us</a></li>
+                            <li><a href="/privacy/" class="hover:text-blue-500">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact & Social -->
+                <div>
+                    <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-2">Contact</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Email: <a href="mailto:support@maegham.com" class="hover:text-blue-500">support@maegham.com</a>
+                    </p>
+                    <div class="flex space-x-4 mt-3 text-gray-600 dark:text-gray-400">
+                        <a href="#" class="hover:text-blue-500"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-blue-500"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-blue-500"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="hover:text-blue-500"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 border-t border-gray-300 dark:border-gray-600 pt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                &copy; 2025 Maegham FaceGuard. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chart Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            const data = JSON.parse('{{ bar_chart_data|safe }}');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Present Days',
+                        data: data.data,
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            precision: 0,
+                            grid: {
+                                drawBorder: false,
+                                color: '#e5e7eb'
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#6b7280',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Toggle mobile menu
+            function toggleMenu() {
+                const mobileMenu = document.querySelector('.mobile-menu');
+                mobileMenu.classList.toggle('active');
+            }
+
+            // Toggle dark/light theme
+            function toggleTheme() {
+                const html = document.documentElement;
+                html.classList.toggle('dark');
+                
+                // Store preference in localStorage
+                const isDark = html.classList.contains('dark');
+                localStorage.setItem('darkMode', isDark);
+            }
+
+            // Check for saved theme preference
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+            }
+        });
+    </script>
+    <script>
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    <style>
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .mobile-menu {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .mobile-menu.active {
+            max-height: 500px;
+        }
+        .theme-icon {
+            transition: transform 0.3s ease;
+        }
+        .dark .theme-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+
+<script>
+        // Initialize dropdown menus and theme
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuButton = document.querySelector('[onclick="toggleMenu()"]');
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', toggleMenu);
+            }
+
+            // Theme toggle
+            const themeButton = document.querySelector('[onclick="toggleTheme()"]');
+            if (themeButton) {
+                themeButton.addEventListener('click', toggleTheme);
+            }
+
+            // Initialize dropdown menus
+            const dropdowns = document.querySelectorAll('.relative.group');
+            dropdowns.forEach(dropdown => {
+                const button = dropdown.querySelector('button');
+                const menu = dropdown.querySelector('.absolute');
+
+                if (button && menu) {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isOpen = menu.classList.contains('block');
+                        document.querySelectorAll('.absolute').forEach(m => m.classList.add('hidden'));
+                        if (!isOpen) {
+                            menu.classList.remove('hidden');
+                            menu.classList.add('block');
+                        }
+                    });
+                }
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.absolute').forEach(menu => {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('block');
+                });
+            });
+
+            // Initialize theme from localStorage
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+            } else if (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            }
+        });
+
+        // Toggle mobile menu
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            mobileMenu.classList.toggle('active');
+        }
+ 
+ </script>
+<script>
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>

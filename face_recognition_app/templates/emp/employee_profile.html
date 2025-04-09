@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Profile | Maegham FaceGuard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200 pt-20 pb-16 min-h-screen">
+    <!-- Navigation (same as index.html) -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/dashboard/" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                <i class="fas fa-user-shield text-blue-500 mr-2"></i>
+                <span>Maegham FaceGuard</span>
+            </a>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                    <i class="fas fa-moon theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">
+                    <i class="fas fa-user-circle text-blue-500 mr-2"></i> Your Profile
+                </h2>
+                <a href="{% url 'employee_attendance_history' %}" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Attendance
+                </a>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Profile Card -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Basic Information</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Username</p>
+                                    <p class="text-gray-800 dark:text-white font-medium">{{ employee.user.username }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Known Person Name</p>
+                                    <p class="text-gray-800 dark:text-white font-medium">{{ employee.known_person.name }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                                    <p class="text-gray-800 dark:text-white font-medium">{{ employee.known_person.email }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Security</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Password</p>
+                                    <div class="flex items-center">
+                                        <input type="password" id="pw" value="{{ employee.raw_password }}" readonly 
+                                            class="bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-l-lg px-4 py-2 w-full">
+                                        <button onclick="togglePassword()" 
+                                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r-lg transition">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Image Card -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Profile Image</h3>
+                    <div class="flex justify-center">
+                        {% if employee.known_person.image %}
+                            <img src="{{ employee.known_person.image.url }}" 
+                                class="w-40 h-40 rounded-full object-cover border-4 border-blue-500 shadow-md">
+                        {% else %}
+                            <div class="w-40 h-40 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                <span class="text-red-500 text-4xl">
+                                    <i class="fas fa-user-slash"></i>
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Toggle password visibility
+        function togglePassword() {
+            const input = document.getElementById('pw');
+            const button = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                button.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+    </script>
+</body>
+</html>

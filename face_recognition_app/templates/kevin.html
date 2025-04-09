@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Analytics | Maegham FaceGuard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .progress-bar { transition: width 0.5s ease-in-out; }
+        .mobile-menu { transition: all 0.3s ease; max-height: 0; overflow: hidden; }
+        .mobile-menu.active { max-height: 500px; }
+        .theme-icon { transition: transform 0.3s ease; }
+        .dark .theme-icon { transform: rotate(180deg); }
+        #chart-container {
+            width: 100%;
+            height: 400px;
+        }
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+    <script>
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    <style>
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .mobile-menu {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .mobile-menu.active {
+            max-height: 500px;
+        }
+        .theme-icon {
+            transition: transform 0.3s ease;
+        }
+        .dark .theme-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+
+<script>
+        // Initialize dropdown menus and theme
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuButton = document.querySelector('[onclick="toggleMenu()"]');
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', toggleMenu);
+            }
+
+            // Theme toggle
+            const themeButton = document.querySelector('[onclick="toggleTheme()"]');
+            if (themeButton) {
+                themeButton.addEventListener('click', toggleTheme);
+            }
+
+            // Initialize dropdown menus
+            const dropdowns = document.querySelectorAll('.relative.group');
+            dropdowns.forEach(dropdown => {
+                const button = dropdown.querySelector('button');
+                const menu = dropdown.querySelector('.absolute');
+
+                if (button && menu) {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isOpen = menu.classList.contains('block');
+                        document.querySelectorAll('.absolute').forEach(m => m.classList.add('hidden'));
+                        if (!isOpen) {
+                            menu.classList.remove('hidden');
+                            menu.classList.add('block');
+                        }
+                    });
+                }
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.absolute').forEach(menu => {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('block');
+                });
+            });
+
+            // Initialize theme from localStorage
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+            } else if (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            }
+        });
+
+        // Toggle mobile menu
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            mobileMenu.classList.toggle('active');
+        }
+ 
+ </script>
+<script>
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/dashboard/" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                <i class="fas fa-user-shield text-blue-500 mr-2"></i>
+                <span>Maegham FaceGuard</span>
+            </a>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="/dashboard/" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-home mr-2"></i> Dashboard
+                    </a>
+                    
+                    <!-- Attendance Dropdown -->
+                    <div class="relative group">
+                        <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                            <i class="fas fa-clipboard-list mr-2"></i> Attendance
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                            <a href="{% url 'attendance' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">View Attendance</a>
+                            <a href="{% url 'attendance_summary' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Summary</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Analytics Dropdown -->
+                    <div class="relative group">
+                        <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                            <i class="fas fa-chart-line mr-2"></i> Analytics
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                            <a href="{% url 'analytics' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Overview</a>
+                            <a href="{% url 'employees_month_performance' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Monthly Performance</a>
+                            <a href="{% url 'kevin' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Advanced Analytics</a>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'upload_face' %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-upload mr-2"></i> Upload
+                    </a>
+                    <a href="{% url 'unknown_faces' %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-user-secret mr-2"></i> Unknown Faces
+                    </a>
+                    
+                    <!-- Auth Dropdown -->
+                    <div class="relative group">
+                        <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                            <i class="fas fa-user-circle mr-2"></i> Account
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                                        
+                            <a href="{% url 'logout' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Logout</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                    <i class="fas fa-moon theme-icon"></i>
+                </button>
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMenu()" class="md:hidden p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu md:hidden bg-blue-500 dark:bg-blue-600">
+            <div class="container mx-auto px-4 py-2 flex flex-col">
+                <a href="/dashboard/" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-home mr-3"></i> Dashboard
+                </a>
+                <a href="{% url 'attendance' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-clipboard-list mr-3"></i> Attendance
+                </a>
+                <a href="{% url 'analytics' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-chart-line mr-3"></i> Analytics
+                </a>
+                <a href="{% url 'upload_face' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-upload mr-3"></i> Upload
+                </a>
+                <a href="{% url 'unknown_faces' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-user-secret mr-3"></i> Unknown Faces
+                </a>
+                    
+                    
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-16 min-h-screen">
+        <section class="py-8 px-4">
+            <div class="container mx-auto">
+                <!-- Page Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-white">
+                        <i class="fas fa-chart-bar text-blue-500 mr-2"></i>
+                        Companies Working Hours Analytics
+                    </h1>
+                    <div class="mt-4 md:mt-0">
+                        <span class="text-lg font-semibold text-blue-500 dark:text-blue-400">
+                            {{ selected_month_name }} {{ selected_year }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Filter Form -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+                    <form method="get" class="flex flex-col md:flex-row items-center gap-4">
+                        <div class="w-full md:w-auto">
+                            <label for="month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month</label>
+                            <select name="month" id="month" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-blue-500 focus:border-blue-500">
+                                {% for value, name in month_choices %}
+                                    <option value="{{ value }}" {% if value == selected_month %}selected{% endif %}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="w-full md:w-auto">
+                            <label for="year" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year</label>
+                            <select name="year" id="year" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-blue-500 focus:border-blue-500">
+                                {% for y in year_choices %}
+                                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="mt-6 md:mt-0 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition flex items-center justify-center">
+                            <i class="fas fa-filter mr-2"></i> Filter
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                    {% if data_available %}
+                        <div id="chart-container" class="p-6">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    {% else %}
+                        <div class="p-12 text-center">
+                            <div class="text-red-500 dark:text-red-400 text-5xl mb-4">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">No Data Available</h3>
+                            <p class="text-gray-600 dark:text-gray-400">There is no attendance data for {{ selected_month_name }} {{ selected_year }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow-inner border-t border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            &copy; 2025 Maegham FaceGuard. All rights reserved.
+        </div>
+    </footer>
+
+    {% if data_available %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            
+            // Chart configuration
+            const chartConfig = {
+                type: 'bar',
+                data: {
+                    labels: {{ chart_labels|safe }},
+                    datasets: [{
+                        label: 'Working Hours',
+                        data: {{ chart_data|safe }},
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                },
+                                color: '#6b7280'
+                            },
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Hours',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                },
+                                color: '#6b7280'
+                            },
+                            grid: {
+                                color: '#e5e7eb',
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#6b7280',
+                                font: {
+                                    size: 14
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: '#1f2937',
+                            titleColor: '#f9fafb',
+                            bodyColor: '#f9fafb',
+                            borderColor: '#374151',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    }
+                }
+            };
+
+            // Create chart
+            const chart = new Chart(ctx, chartConfig);
+
+            // Theme functions
+            function toggleTheme() {
+                const html = document.documentElement;
+                html.classList.toggle('dark');
+                localStorage.setItem('darkMode', html.classList.contains('dark'));
+                updateChartTheme();
+            }
+
+            function updateChartTheme() {
+                const isDark = document.documentElement.classList.contains('dark');
+                const textColor = isDark ? '#9ca3af' : '#6b7280';
+                const tooltipBg = isDark ? '#111827' : '#1f2937';
+
+                chart.options.scales.x.ticks.color = textColor;
+                chart.options.scales.y.ticks.color = textColor;
+                chart.options.scales.x.title.color = textColor;
+                chart.options.scales.y.title.color = textColor;
+                chart.options.plugins.legend.labels.color = textColor;
+                chart.options.plugins.tooltip.backgroundColor = tooltipBg;
+                
+                chart.update();
+            }
+
+            // Initialize theme
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+            }
+            updateChartTheme();
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

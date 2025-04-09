@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unknown Faces</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+    <style>
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .mobile-menu {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .mobile-menu.active {
+            max-height: 500px;
+        }
+        .theme-icon {
+            transition: transform 0.3s ease;
+        }
+        .dark .theme-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+
+<script>
+        // Initialize dropdown menus and theme
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuButton = document.querySelector('[onclick="toggleMenu()"]');
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', toggleMenu);
+            }
+
+            // Theme toggle
+            const themeButton = document.querySelector('[onclick="toggleTheme()"]');
+            if (themeButton) {
+                themeButton.addEventListener('click', toggleTheme);
+            }
+
+            // Initialize dropdown menus
+            const dropdowns = document.querySelectorAll('.relative.group');
+            dropdowns.forEach(dropdown => {
+                const button = dropdown.querySelector('button');
+                const menu = dropdown.querySelector('.absolute');
+
+                if (button && menu) {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isOpen = menu.classList.contains('block');
+                        document.querySelectorAll('.absolute').forEach(m => m.classList.add('hidden'));
+                        if (!isOpen) {
+                            menu.classList.remove('hidden');
+                            menu.classList.add('block');
+                        }
+                    });
+                }
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.absolute').forEach(menu => {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('block');
+                });
+            });
+
+            // Initialize theme from localStorage
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+            } else if (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            }
+        });
+
+        // Toggle mobile menu
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            mobileMenu.classList.toggle('active');
+        }
+ 
+ </script>
+<script>
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+
+<!-- Navigation Bar -->
+<nav class="bg-white dark:bg-gray-800 shadow-md fixed top-0 w-full z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="/dashboard/" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+            <i class="fas fa-user-shield text-blue-500 mr-2"></i>
+            <span>Maegham FaceGuard</span>
+        </a>
+        
+        <div class="flex items-center space-x-4">
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-1">
+                <a href="/dashboard/" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                    <i class="fas fa-home mr-2"></i> Dashboard
+                </a>
+                
+                <!-- Attendance Dropdown -->
+                <div class="relative group">
+                    <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-clipboard-list mr-2"></i> Attendance
+                        <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                    </button>
+                    <div class="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="{% url 'attendance' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">View Attendance</a>
+                        <a href="{% url 'attendance_summary' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Summary</a>
+                    </div>
+                </div>
+                
+                <!-- Analytics Dropdown -->
+                <div class="relative group">
+                    <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-chart-line mr-2"></i> Analytics
+                        <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                    </button>
+                    <div class="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="{% url 'analytics' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Overview</a>
+                        <a href="{% url 'employees_month_performance' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Monthly Performance</a>
+                        <a href="{% url 'kevin' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Advanced Analytics</a>
+                    </div>
+                </div>
+                
+                <a href="{% url 'upload_face' %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                    <i class="fas fa-upload mr-2"></i> Upload
+                </a>
+                <a href="{% url 'unknown_faces' %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                    <i class="fas fa-user-secret mr-2"></i> Unknown Faces
+                </a>
+                
+                <!-- Auth Dropdown -->
+                <div class="relative group">
+                    <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-user-circle mr-2"></i> Account
+                        <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                                
+                        <a href="{% url 'logout' %}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Logout</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                <i class="fas fa-moon theme-icon"></i>
+            </button>
+            <!-- Mobile Menu Button -->
+            <button onclick="toggleMenu()" class="md:hidden p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu md:hidden bg-blue-500 dark:bg-blue-600">
+        <div class="container mx-auto px-4 py-2 flex flex-col">
+            <a href="/dashboard/" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                <i class="fas fa-home mr-3"></i> Dashboard
+            </a>
+            <a href="{% url 'attendance' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                <i class="fas fa-clipboard-list mr-3"></i> Attendance
+            </a>
+            <a href="{% url 'analytics' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                <i class="fas fa-chart-line mr-3"></i> Analytics
+            </a>
+            <a href="{% url 'upload_face' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                <i class="fas fa-upload mr-3"></i> Upload
+            </a>
+            <a href="{% url 'unknown_faces' %}" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                <i class="fas fa-user-secret mr-3"></i> Unknown Faces
+            </a>
+            
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="pt-20 pb-16 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">
+            <i class="fas fa-question-circle text-blue-500 mr-2"></i> Unknown Faces
+        </h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for face in unknown_faces %}
+            <div class="flip-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                <div class="flip-card-inner">
+                    <!-- Front side -->
+                    <div class="flip-card-front">
+                        {% if face.image %}
+                            <img src="{{ face.image.url }}" alt="{{ face.label }}" class="w-full h-48 object-cover">
+                        {% else %}
+                            <div class="flex items-center justify-center h-48 bg-gray-200">
+                                <p class="text-gray-500">No Image</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <!-- Back side -->
+                    <div class="flip-card-back bg-gray-800 text-white flex flex-col items-center justify-center p-4">
+                        <p><strong>Label:</strong> {{ face.label }}</p>
+                        <p><strong>Date:</strong> {{ face.uploaded_at|date:"Y-m-d" }}</p>
+                        <p><strong>Time:</strong> {{ face.uploaded_at|time:"H:i:s" }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="no-data text-center text-gray-500">No unknown faces found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow-inner border-t border-gray-200 dark:border-gray-700 mt-12">
+        <div class="container mx-auto px-4 py-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
+                
+                <!-- Logo & Description -->
+                <div>
+                    <a href="#" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center mb-2">
+                        <i class="fas fa-user-shield text-blue-500 mr-2"></i> Maegham FaceGuard
+                    </a>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 max-w-sm">
+                        Real-time face recognition and attendance system built for accuracy and security.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div>
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-2">Quick Links</h4>
+                        <ul class="text-gray-600 dark:text-gray-400 space-y-1 text-sm">
+                            <li><a href="/dashboard/" class="hover:text-blue-500">Dashboard</a></li>
+                            <li><a href="{% url 'upload_face' %}" class="hover:text-blue-500">Upload & Train</a></li>
+                            <li><a href="{% url 'attendance' %}" class="hover:text-blue-500">Attendance</a></li>
+                            <li><a href="{% url 'analytics' %}" class="hover:text-blue-500">Analytics</a></li>
+                            <li><a href="{% url 'employees_month_performance' %}" class="hover:text-blue-500">Monthly Reports</a></li>
+                            <li><a href="{% url 'unknown_faces' %}" class="hover:text-blue-500">Unknown Faces</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-2">Support</h4>
+                        <ul class="text-gray-600 dark:text-gray-400 space-y-1 text-sm">
+                            <li><a href="/settings/" class="hover:text-blue-500">Settings</a></li>
+                            <li><a href="/contact/" class="hover:text-blue-500">Contact Us</a></li>
+                            <li><a href="/privacy/" class="hover:text-blue-500">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact & Social -->
+                <div>
+                    <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-2">Contact</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Email: <a href="mailto:support@maegham.com" class="hover:text-blue-500">support@maegham.com</a>
+                    </p>
+                    <div class="flex space-x-4 mt-3 text-gray-600 dark:text-gray-400">
+                        <a href="#" class="hover:text-blue-500"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-blue-500"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-blue-500"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="hover:text-blue-500"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 border-t border-gray-300 dark:border-gray-600 pt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                &copy; 2025 Maegham FaceGuard. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

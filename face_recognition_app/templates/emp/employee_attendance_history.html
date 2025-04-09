@@ -1,0 +1,120 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance History | Maegham FaceGuard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200 pt-20 pb-16 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/dashboard/" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                <i class="fas fa-user-shield text-blue-500 mr-2"></i>
+                <span>Maegham FaceGuard</span>
+            </a>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                    <i class="fas fa-moon theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">
+                    <i class="fas fa-history text-blue-500 mr-2"></i> Your Attendance History
+                </h2>
+                <a href="{% url 'employee_profile' %}" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition flex items-center">
+                    <i class="fas fa-user-circle mr-2"></i> View Profile
+                </a>
+            </div>
+
+            <!-- Filter Form -->
+            <form method="get" class="mb-8 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <div class="flex flex-wrap items-center gap-4">
+                    <div>
+                        <label for="month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month</label>
+                        <select name="month" id="month" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg px-4 py-2 w-full">
+                            {% for m in 1|to_range:12 %}
+                            <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="year" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year</label>
+                        <select name="year" id="year" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg px-4 py-2 w-full">
+                            {% for y in 2023|to_range:2026 %}
+                            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="self-end">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition">
+                            <i class="fas fa-filter mr-2"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Attendance Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">IN Time</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">OUT Time</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for record in attendance_records %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{{ record.date }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{{ record.in_time }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{{ record.out_time }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{{ record.working_hours }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                No attendance found for selected period.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>

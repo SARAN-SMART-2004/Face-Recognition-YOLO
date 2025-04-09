@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance History Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .mobile-menu {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .mobile-menu.active {
+            max-height: 500px;
+        }
+        .theme-icon {
+            transition: transform 0.3s ease;
+        }
+        .dark .theme-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+
+<script>
+        // Initialize dropdown menus and theme
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuButton = document.querySelector('[onclick="toggleMenu()"]');
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', toggleMenu);
+            }
+
+            // Theme toggle
+            const themeButton = document.querySelector('[onclick="toggleTheme()"]');
+            if (themeButton) {
+                themeButton.addEventListener('click', toggleTheme);
+            }
+
+            // Initialize dropdown menus
+            const dropdowns = document.querySelectorAll('.relative.group');
+            dropdowns.forEach(dropdown => {
+                const button = dropdown.querySelector('button');
+                const menu = dropdown.querySelector('.absolute');
+
+                if (button && menu) {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isOpen = menu.classList.contains('block');
+                        document.querySelectorAll('.absolute').forEach(m => m.classList.add('hidden'));
+                        if (!isOpen) {
+                            menu.classList.remove('hidden');
+                            menu.classList.add('block');
+                        }
+                    });
+                }
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.absolute').forEach(menu => {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('block');
+                });
+            });
+
+            // Initialize theme from localStorage
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+            } else if (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            }
+        });
+
+        // Toggle mobile menu
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            mobileMenu.classList.toggle('active');
+        }
+ 
+ </script>
+<script>
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Store preference in localStorage
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .filters {
+            margin-bottom: 20px;
+        }
+        select {
+            padding: 5px;
+            margin-right: 10px;
+        }
+        #chart-container {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+        }
+        .no-data {
+            text-align: center;
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    {% if has_data %}
+    <canvas id="barChart" width="600" height="400"></canvas>
+{% else %}
+    <p>No attendance data available for the selected criteria.</p>
+{% endif %}
+
+    <h2>Attendance History</h2>
+
+    <form method="get" class="filters">
+        <label for="name">Select Person:</label>
+        <select name="name" id="name">
+            {% for person in person_list %}
+                <option value="{{ person }}" {% if selected_name == person %}selected{% endif %}>{{ person }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="month">Month:</label>
+        <select name="month" id="month">
+            {% for m in month_range %}
+                <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+        
+
+        <label for="year">Year:</label>
+        <select name="year" id="year">
+            {% for y in year_range %}
+                <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Filter</button>
+    </form>
+
+    <div id="chart-container">
+        {% if chart_data.labels %}
+            <canvas id="attendanceChart"></canvas>
+        {% else %}
+            <p class="no-data">No attendance data available for the selected criteria.</p>
+        {% endif %}
+    </div>
+
+    {% if chart_data.labels %}
+    <script>
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_data.labels|safe }},
+                datasets: [{
+                    label: 'Attendance (Days)',
+                    data: {{ chart_data.data|safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        stepSize: 1
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

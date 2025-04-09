@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Employee | Maegham FaceGuard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .progress-bar { transition: width 0.5s ease-in-out; }
+        .mobile-menu { transition: all 0.3s ease; max-height: 0; overflow: hidden; }
+        .mobile-menu.active { max-height: 500px; }
+        .theme-icon { transition: transform 0.3s ease; }
+        .dark .theme-icon { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/dashboard/" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                <i class="fas fa-user-shield text-blue-500 mr-2"></i>
+                <span>Maegham FaceGuard</span>
+            </a>
+            
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="/dashboard/" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                    <i class="fas fa-home mr-2"></i> Dashboard
+                </a>
+                
+                <div class="relative group">
+                    <button class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                        <i class="fas fa-clipboard-list mr-2"></i> Attendance
+                        <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                    </button>
+                    <div class="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="#" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">View Attendance</a>
+                        <a href="#" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700">Today's Absentees</a>
+                    </div>
+                </div>
+                
+                <a href="#" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition flex items-center">
+                    <i class="fas fa-user-plus mr-2"></i> Employees
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                    <i class="fas fa-moon theme-icon"></i>
+                </button>
+                <button onclick="toggleMenu()" class="md:hidden p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu md:hidden bg-blue-500 dark:bg-blue-600">
+            <div class="container mx-auto px-4 py-2 flex flex-col">
+                <a href="/dashboard/" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-home mr-3"></i> Dashboard
+                </a>
+                <a href="#" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-clipboard-list mr-3"></i> Attendance
+                </a>
+                <a href="#" class="px-4 py-3 text-white hover:bg-blue-400 dark:hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-user-plus mr-3"></i> Employees
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-16 min-h-screen px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-transform hover:scale-[1.005]">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">
+                        <i class="fas fa-user-plus mr-2 text-blue-500"></i> Add New Employee
+                    </h2>
+                    <a href="#" class="text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 flex items-center transition">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to List
+                    </a>
+                </div>
+
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2 font-medium">Username (must match KnownPerson name)</label>
+                        <input type="text" name="username" required 
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition duration-200">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2 font-medium">Password</label>
+                        <input type="password" name="password" required 
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition duration-200">
+                    </div>
+
+                    <button type="submit" 
+                        class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition duration-200 flex items-center">
+                        <i class="fas fa-save mr-2"></i> Create Employee
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow-inner border-t border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 py-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
+                
+                <!-- Logo & Description -->
+                <div>
+                    <a href="#" class="text-2xl font-bold text-gray-800 dark:text-white flex items-center mb-2">
+                        <i class="fas fa-user-shield text-blue-500 mr-2"></i> Maegham FaceGuard
+                    </a>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 max-w-sm">
+                        Real-time face recognition and attendance system built for accuracy and security.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div>
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-2">Quick Links</h4>
+                        <ul class="text-gray-600 dark:text-gray-400 space-y-1 text-sm">
+                            <li><a href="#" class="hover:text-blue-500 transition">Dashboard</a></li>
+                            <li><a href="#" class="hover:text-blue-500 transition">Employees</a></li>
+                            <li><a href="#" class="hover:text-blue-500 transition">Attendance</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-2">Support</h4>
+                        <ul class="text-gray-600 dark:text-gray-400 space-y-1 text-sm">
+                            <li><a href="#" class="hover:text-blue-500 transition">Settings</a></li>
+                            <li><a href="#" class="hover:text-blue-500 transition">Contact Us</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact & Social -->
+                <div>
+                    <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-2">Contact</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Email: <a href="mailto:support@maegham.com" class="hover:text-blue-500 transition">support@maegham.com</a>
+                    </p>
+                    <div class="flex space-x-4 mt-3 text-gray-600 dark:text-gray-400">
+                        <a href="#" class="hover:text-blue-500 transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-blue-500 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-blue-500 transition"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 border-t border-gray-300 dark:border-gray-600 pt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                &copy; 2025 Maegham FaceGuard. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle mobile menu
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            mobileMenu.classList.toggle('active');
+        }
+
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>
